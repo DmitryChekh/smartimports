@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -19,10 +20,12 @@ func main() {
 	var targetPath string
 	var localPackage string
 	var excludedPaths string
+	var filter string
 
 	flag.StringVar(&targetPath, "path", ".", "target path to apply smart goimports, can be a file or a directory")
 	flag.StringVar(&localPackage, "local", "", "put imports beginning with this string after 3rd-party packages; comma-separated list")
 	flag.StringVar(&excludedPaths, "exclude", "", "paths which should be excluded from processing; comma-separated list")
+	flag.StringVar(&filter, "filter", "", "regexp of paths which should be processing from processing")
 	flag.BoolVar(&verbose, "v", false, "verbose output")
 
 	flag.Parse()
@@ -40,14 +43,19 @@ func main() {
 		filteredExcludedPaths = append(filteredExcludedPaths, path)
 	}
 
-	err := processDir(targetPath, opts, filteredExcludedPaths)
+	var filterRegexp *regexp.Regexp
+	if filter != "" {
+		filterRegexp = regexp.MustCompile(filter)
+	}
+
+	err := processDir(targetPath, opts, filteredExcludedPaths, filterRegexp)
 	if err != nil {
 		fmt.Println("error while formatting:", err.Error())
 		os.Exit(1)
 	}
 }
 
-func processDir(path string, opts *imports.Options, excludedPaths []string) error {
+func processDir(path string, opts *imports.Options, excludedPaths []string, filterRegexp *regexp.Regexp) error {
 	return filepath.Walk(path, func(path string, info fs.FileInfo, err error) error {
 		if verbose {
 			fmt.Println("processing path", path)
@@ -63,6 +71,12 @@ func processDir(path string, opts *imports.Options, excludedPaths []string) erro
 		if info.IsDir() {
 			if verbose {
 				fmt.Println("   skipped because it's a dir")
+			}
+			return nil
+		}
+		if filterRegexp != nil && !filterRegexp.MatchString(info.Name()) {
+			if verbose {
+				fmt.Println("   skipped because it's matched this filter:", filterRegexp)
 			}
 			return nil
 		}

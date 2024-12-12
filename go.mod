@@ -1,4 +1,4 @@
-module github.com/pav5000/smartimports
+module github.com/dmitrychekh/smartimports
 
 go 1.16
 

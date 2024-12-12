@@ -1,5 +1,7 @@
 # Smart imports
 
+forked from https://github.com/pav5000
+
 If you want to format imports in your golang source files according to the standards of your team, this tool might be handy.
 
 Standard tool `goimports` doesn't regroup imports. For example if you have a file
@@ -31,9 +33,9 @@ import (
 
 # Installation
 
-For go 1.16: `go install github.com/pav5000/smartimports@latest`
+For go 1.16: `go install github.com/pav5000/smartimports/cmd/smartimports@latest`
 
-For earlier versions of go: `go get github.com/pav5000/smartimports`
+For earlier versions of go: `go get github.com/pav5000/smartimports/cmd/smartimports`
 
 # Usage
 
@@ -50,5 +52,7 @@ With option `-exclude` you can specify prefixes for paths which shouldn't be pro
 If your `-path` is absolute, `-exclude` should be absolute too.
 
 With option `-local` you can specify a comma-separated list of prefixes for packages which should be grouped into 3rd group. Some teams put their local packages into it.
+
+With option `-filter` you can specify regexp for paths which should be processed
 
 With option `-v` you can see verbose output of traversing through directories and files.
